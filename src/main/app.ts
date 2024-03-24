@@ -1,9 +1,9 @@
 import yargs from 'yargs';
-import { Color } from './color.js';
-import { Tipo } from './tipo.js';
-import { Rareza } from './rareza.js';
-import { Carta } from './carta.js';
-import { Coleccion } from './coleccion.js';
+import { Color } from '../code/color.js';
+import { Tipo } from '../code/tipo.js';
+import { Rareza } from '../code/rareza.js';
+import { Carta } from '../code/carta.js';
+import { Coleccion } from '../code/coleccion.js';
 import { hideBin } from 'yargs/helpers';
 
 let coleccion = new Coleccion();

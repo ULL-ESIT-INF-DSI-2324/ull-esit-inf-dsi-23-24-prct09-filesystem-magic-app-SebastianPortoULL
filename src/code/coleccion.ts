@@ -9,17 +9,32 @@ import { Carta } from './carta.js';
 
 const DIR_BASE = '/home/usuario/ull-esit-inf-dsi-23-24-prct09-filesystem-magic-app-SebastianPortoULL/usuarios';
 
+/**
+ * @brief Clase que representa una colección de cartas.
+ */
 export class Coleccion {
 
 	private dirBase: string;
 
+	/**
+	 * @brief Crea una instancia de la clase Coleccion.
+	 */
 	constructor() {
 		this.dirBase = DIR_BASE;
 	}
 
+	/**
+	 * @brief Obtiene el directorio base de la colección.
+	 * @returns El directorio base de la colección.
+	 */
 	get dirbase() { return this.dirBase; }
 
-  añadirCarta(usuario: string, carta: Carta) {
+  /**
+   * @brief Añade una carta a la colección de un usuario.
+   * @param usuario - El nombre del usuario.
+   * @param carta - La carta a añadir.
+   */
+  añadirCarta(usuario: string, carta: Carta) : void {
     const dirUsuario = path.join(this.dirbase, usuario);
     if (!fs.existsSync(dirUsuario)) {
       fs.mkdirSync(dirUsuario);
@@ -28,40 +43,46 @@ export class Coleccion {
     const filePath = path.join(dirUsuario, `${carta.id}.json`);
     if (fs.existsSync(filePath)) {
       console.error(chalk.red('Error: La carta ya existe en la colección.'));
-      return;
+      throw new Error('La carta ya existe en la colección.');
     }
 
 		// Si es de tipo Criatura, comprobar que tiene fuerza y resistencia. Si no es Criatura, no deben existir estos campos
 		if (carta.tipo === Tipo.Criatura && (!carta.fuerza || !carta.resistencia)) {
 			console.error(chalk.red('Error: Las criaturas deben tener fuerza y resistencia.'));
-			return;
+			throw new Error('Las criaturas deben tener fuerza y resistencia.');
 		} 
 		if (carta.tipo !== Tipo.Criatura && (carta.fuerza || carta.resistencia)) {
 			console.error(chalk.red('Error: Las cartas que no son criaturas no deben tener fuerza ni resistencia.'));
-			return;
+			throw new Error('Las cartas que no son criaturas no deben tener fuerza ni resistencia.');
 		}
 
 		// Si es de tipo Planeswalker, comprobar que tiene marcas de lealtad. Si no es Planeswalker, no deben existir estas marcas
 		if (carta.tipo === Tipo.Planeswalker && !carta.marcasLealtad) {
 			console.error(chalk.red('Error: Los Planeswalker deben tener marcas de lealtad.'));
-			return;
+			throw new Error('Los Planeswalker deben tener marcas de lealtad.');
 		}
 		if (carta.tipo !== Tipo.Planeswalker && carta.marcasLealtad) {
 			console.error(chalk.red('Error: Las cartas que no son Planeswalker no deben tener marcas de lealtad.'));
-			return;
+			throw new Error('Las cartas que no son Planeswalker no deben tener marcas de lealtad.');
 		}
 
     fs.writeFileSync(filePath, JSON.stringify(carta, null, 2));
     console.log(chalk.green('Carta añadida correctamente.'));
   }
 
-  modificarCarta(usuario: string, carta: Carta, argv: any) {
+  /**
+   * @brief Modifica una carta de la colección de un usuario.
+   * @param usuario - El nombre del usuario.
+   * @param carta - La carta a modificar.
+   * @param argv - Los argumentos de modificación.
+   */
+  modificarCarta(usuario: string, carta: Carta, argv: any) : void {
     const dirUsuario = path.join(this.dirbase, usuario);
     const filePath = path.join(dirUsuario, `${carta.id}.json`);
     
     if (!fs.existsSync(filePath)) {
       console.error(chalk.red('Error: La carta no existe en la colección.'));
-      return;
+      throw new Error('La carta no existe en la colección.');
     }
 
     const cartaExistente : Carta = JSON.parse(fs.readFileSync(filePath, 'utf-8')) as Carta;
@@ -82,25 +103,34 @@ export class Coleccion {
     console.log(chalk.green('Carta modificada correctamente.'));
   }
 
-  eliminarCarta(usuario: string, id: number) {
+  /**
+   * @brief Elimina una carta de la colección de un usuario.
+   * @param usuario - El nombre del usuario.
+   * @param id - El ID de la carta a eliminar.
+   */
+  eliminarCarta(usuario: string, id: number) : void {
     const dirUsuario = path.join(this.dirbase, usuario);
     const filePath = path.join(dirUsuario, `${id}.json`);
 
     if (!fs.existsSync(filePath)) {
       console.error(chalk.red('Error: La carta no existe en la colección.'));
-      return;
+      throw new Error('La carta no existe en la colección.');
     }
 
     fs.unlinkSync(filePath);
     console.log(chalk.green('Carta eliminada correctamente.'));
   }
 
-  listarCartas(usuario: string) {
+  /**
+   * @brief Lista todas las cartas de la colección de un usuario.
+   * @param usuario - El nombre del usuario.
+   */
+  listarCartas(usuario: string) : void {
     const dirUsuario = path.join(this.dirbase, usuario);
 
     if (!fs.existsSync(dirUsuario)) {
       console.error(chalk.red('Error: El usuario no tiene cartas en su colección.'));
-      return;
+      throw new Error('El usuario no tiene cartas en su colección.');
     }
 
     const files = fs.readdirSync(dirUsuario);
@@ -108,23 +138,54 @@ export class Coleccion {
       const filePath = path.join(dirUsuario, file);
       const carta = JSON.parse(fs.readFileSync(filePath, 'utf-8')) as Carta;
       const text : string = JSON.stringify(carta, null, 2);
-      const coloredText : string = (chalk as any)[Color[carta.color]](text);
-      console.log(coloredText);
+      if (carta.color === Color.colorless) {
+        console.log(text);
+      } else if (carta.color === Color.multicolor) {
+        // Multicolor no es un color en sí mismo, sino una combinación de colores, cada letra del texto tendra uno de los 5 colores básicos
+        let coloredText : string = '';
+        for (let i = 0; i < text.length; i += 5) {
+          for (let j = 0; j < 5; j++) {
+            coloredText += (chalk as any)[Color[j]](text[i + j]);
+          }
+        }
+        console.log(coloredText);
+      } else {
+        const coloredText : string = (chalk as any)[Color[carta.color]](text);
+        console.log(coloredText);
+      }
     });
   }
 
-  mostrarCarta(usuario: string, id: number) {
+  /**
+   * @brief Muestra una carta específica de la colección de un usuario.
+   * @param usuario - El nombre del usuario.
+   * @param id - El ID de la carta a mostrar.
+   */
+  mostrarCarta(usuario: string, id: number) : void {
     const dirUsuario = path.join(this.dirbase, usuario);
     const filePath = path.join(dirUsuario, `${id}.json`);
 
     if (!fs.existsSync(filePath)) {
       console.error(chalk.red('Error: La carta no existe en la colección.'));
-      return;
+      throw new Error('La carta no existe en la colección.');
     }
 
     const carta = JSON.parse(fs.readFileSync(filePath, 'utf-8')) as Carta;
     const text : string = JSON.stringify(carta, null, 2);
-    const coloredText : string = (chalk as any)[Color[carta.color]](text);
-    console.log(coloredText);
+    if (carta.color === Color.colorless) {
+      console.log(text);
+    } else if (carta.color === Color.multicolor) {
+      // Multicolor no es un color en sí mismo, sino una combinación de colores, cada letra del texto tendra uno de los 5 colores básicos
+      let coloredText : string = '';
+      for (let i = 0; i < text.length; i += 5) {
+        for (let j = 0; j < 5; j++) {
+          coloredText += (chalk as any)[Color[j]](text[i + j]);
+        }
+      }
+      console.log(coloredText);
+    } else {
+      const coloredText : string = (chalk as any)[Color[carta.color]](text);
+      console.log(coloredText);
+    }
   }
 }
