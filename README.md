@@ -146,7 +146,7 @@ El programa principal se encuentra en el directorio `/src/main`:
 ## Conclusión
 Durante la realización de la práctica se desarrolló con éxito una aplicación en TypeScript para gestionar colecciones de cartas **Magic** a través de la línea de comandos. Se emplearon herramientas como `yargs` y `chalk` para mejorar la interacción y visualización en la consola, respectivamente. También se ha empleado el módulo `fs` de Node.js para gestionar de manera efectiva y segura el sistema de ficheros, facilitando las operaciones de lectura, escritura y manipulación de archivos relacionados con las colecciones de cartas Magic. El proyecto se estructuró de manera organizada y se alojó en un repositorio de GitHub, reflejando las buenas prácticas de programación aprendidas en clase.
 
-Cabe destacar que debido a la estructura de los tests y el uso de la API síncrona, al realizar el push no se pushean los cambios en los tests ni se crean ni borran o modifican los ficheros, por lo que no pasará tests, coverage y sonarcloud en GitHubActions, a pesar de hacerlo en el repositorio.
+Cabe destacar que debido a la estructura de los tests y el uso de la API síncrona, al realizar el push no se pushean los cambios en los tests ni se crean ni borran o modifican los ficheros, por lo que no pasará Tests, Coverage y Sonarcloud en GitHubActions, a pesar de hacerlo en el repositorio local.
 
 ---
 
